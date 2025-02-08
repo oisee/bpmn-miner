@@ -1,23 +1,15 @@
-import React from "react";
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import BPMNSketchMiner from './BPMNSketchMiner';
 
-//Utils
-import ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
+// Get the root element from the DOM
+const rootElement = document.getElementById('root');
 
-//Component
-import App from "./App";
-
-//Service Worker
-import * as serviceWorker from "./serviceWorker";
-
-ReactDOM.render(
-	<Router>
-		<App />
-	</Router>,
-	document.getElementById("root")
+// Create the React root and render the component
+const root = createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <BPMNSketchMiner />
+  </React.StrictMode>
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
