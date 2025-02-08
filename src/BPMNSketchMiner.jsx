@@ -3,102 +3,53 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 
 // Parse text into BPMN elements
 const parseBPMN = (text) => {
-  const lines = text.split('\n').filter(line => line.trim());
-  let mermaidCode = 'graph TD\n';
-  let nodeId = 0;
-  let pools = new Map();
-  let currentPool = null;
+    const lines = text.split('\n').filter(line => line.trim());
+    let mermaidCode = '';
+    let nodeId = 1;
+    let branchId = 1;
+    let pools = new Map();
+    let currentPool = null;
   
-  // Add Start event
-  mermaidCode += `  Start(( ))\n`;
-  nodeId++;
-
-  for (let line of lines) {
-    line = line.trim();
-    
-    // Skip comments
-    if (line.startsWith('///')) continue;
-    
-    // Handle pool definitions
-    if (line.endsWith(':')) {
-      currentPool = line.slice(0, -1);
-      if (!pools.has(currentPool)) {
-        pools.set(currentPool, []);
+    for (let line of lines) {
+      line = line.trim();
+      if (line.startsWith('///') || line === '') continue; // Skip comments and empty lines
+  
+      // Handle pool definitions
+      if (line.endsWith(':')) {
+        currentPool = line.slice(0, -1);
+        pools.set(currentPool, [`subgraph ${currentPool}`]);
+        continue;
       }
-      continue;
-    }
-
-    // Handle pool task annotations
-    if (line.includes(':')) {
-      const [pool, task] = line.split(':').map(s => s.trim());
-      if (!pools.has(pool)) {
-        pools.set(pool, []);
+  
+      // Identify decision points and branching logic
+      if (line.endsWith('?')) {
+        const conditionNode = `n${nodeId}{"${line}"}`;
+        pools.get(currentPool).push(conditionNode);
+        nodeId++;
+  
+        // Create branching points for conditions
+        const branchStart = `x${branchId}{x}`;
+        pools.get(currentPool).push(branchStart);
+        branchId++;
+        continue;
       }
-      pools.get(pool).push(`n${nodeId}`);
-      mermaidCode += `  n${nodeId}["${task}"]\n`;
-      if (nodeId > 1) {
-        mermaidCode += `  n${nodeId-1} --> n${nodeId}\n`;
-      } else {
-        mermaidCode += `  Start --> n${nodeId}\n`;
-      }
-      nodeId++;
-      continue;
-    }
-
-    // Handle gateway questions
-    if (line.endsWith('?')) {
-      mermaidCode += `  n${nodeId}{"${line}"}\n`;
-      if (currentPool) {
-        pools.get(currentPool).push(`n${nodeId}`);
-      }
-      if (nodeId > 1) {
-        mermaidCode += `  n${nodeId-1} --> n${nodeId}\n`;
-      }
-      nodeId++;
-      continue;
-    }
-
-    // Handle regular tasks
-    // Check if task already exists
-    const existingNode = [...mermaidCode.matchAll(/n\d+\["([^"]+)"\]/g)]
-      .find(match => match[1] === line);
-    
-    if (existingNode) {
-      // If task exists, just add flow to existing node
-      mermaidCode += `  n${nodeId-1} --> ${existingNode[0].split('[')[0]}\n`;
-    } else {
-      // Create new task node
-      //mermaidCode += `  n${nodeId}["${task}"]\n`;
-      mermaidCode += `n${nodeId}["${line}"]\n`;
-      if (currentPool) {
-        pools.get(currentPool).push(`n${nodeId}`);
-      }
-      // Add sequence flow
-      if (nodeId > 1) {
-        mermaidCode += `  n${nodeId-1} --> n${nodeId}\n`;
-      } else {
-        mermaidCode += `  Start --> n${nodeId}\n`;
-      }
+  
+      // Handle regular tasks or conditions
+      const taskNode = `n${nodeId}["${line}"]`;
+      pools.get(currentPool).push(taskNode);
       nodeId++;
     }
-  }
-
-  // Add pools
-  pools.forEach((nodes, poolName) => {
-    if (nodes.length > 0) {
-      mermaidCode += `  subgraph ${poolName}\n`;
-      nodes.forEach(node => {
-        mermaidCode += `    ${node}\n`;
-      });
-      mermaidCode += '  end\n';
-    }
-  });
-
-  // Add End event and connect to last node
-  mermaidCode += `  End((( )))\n`;
-  mermaidCode += `  n${nodeId-1} --> End\n`;
-  return mermaidCode;
-};
+  
+    // Add subgraph start and end markers
+    pools.forEach((nodes, poolName) => {
+      nodes.push(`End${poolName}((( )))`);
+      nodes.push('end');
+      mermaidCode += nodes.join('\n') + '\n';
+    });
+  
+    return `graph TD\n` + mermaidCode;
+  };
+  
 
 const BPMNSketchMiner = () => {
   const [input, setInput] = useState('');
