@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { parseBPMN } from './utils/parseBPMN';
 
-const BPMNSketchMiner = () => {
+const BPSketch = () => {
   const [input, setInput] = useState('');
   const [mermaidCode, setMermaidCode] = useState('');
 
@@ -17,7 +17,7 @@ const BPMNSketchMiner = () => {
     <div className="flex flex-col space-y-4 w-full max-w-full">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>BPMN Sketch Miner</CardTitle>
+          <CardTitle>BPMN Sketch</CardTitle>
         </CardHeader>
         <CardContent className="w-full">
           <div className="grid grid-cols-5 gap-4 w-full min-w-0">
@@ -45,4 +45,4 @@ const BPMNSketchMiner = () => {
   );
 };
 
-export default BPMNSketchMiner;
+export default BPSketch;

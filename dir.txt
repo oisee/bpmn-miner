@@ -12,7 +12,7 @@
 │   └── robots.txt
 └── src
     ├── App.js
-    ├── BPMNSketchMiner.jsx
+    ├── BPSketch.jsx
     ├── assets
     │   ├── images
     │   │   ├── Loading
@@ -34,6 +34,9 @@
     ├── index.js
     ├── pages
     │   └── Home.jsx
-    └── serviceWorker.js
+    ├── serviceWorker.js
+    └── utils
+        ├── parseBPMN.js
+        └── parseBPMN.test.js
 
-14 directories, 23 files
+15 directories, 25 files
